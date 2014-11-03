@@ -8,8 +8,10 @@ inherits apachewrapper::params
 
 include 'apache'
       
+  $vhost_defaults= {}
+  create_resources(apache::vhost, $vhosts,$vhost_defaults)
 
-  create_resources(apache::vhost, $vhosts, {})
+  
 
 }
 
