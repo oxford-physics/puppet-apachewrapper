@@ -11,9 +11,31 @@ define webproxyclient ( $vhosts )
  else {
      $httpconffile = "/etc/apache2/sites-enabled/${name}_on_${hostname}_proxy.conf"
  }
+
+ if (has_key($vhosts["$name"], 'ssl') ) and ( str2bool("${vhosts[$name]['ssl']}") == true ) {
+   $httptech="https"
+   $sslengine = "on"
+   $sslproxyengine = "on"
+#TODO For SSl hosts, we also need to extract the following from the hash
+#    SSLCertificateFile      "/etc/httpd/SSL/xray/xray.physics.ox.ac.uk.crt"
+#    SSLCertificateKeyFile   "/etc/httpd/SSL/xray/xray.key"
+#    SSLCertificateChainFile "/etc/httpd/SSL/xray/s2cabundle.pem"
+#    SSLCACertificatePath    "/etc/pki/tls/certs"
+
+ }
+ else {
+   $httptech = "http" 
+   $sslengine = "off"
+   $sslproxyengine = "off"
+
+ }
+
+ 
   @@file  { "$httpconffile":
            content => "<VirtualHost *:${vhosts[$name][port]}>
     ProxyPreserveHost On
+    SSLEngine $sslengine
+    SSLProxyEngine $sslproxyengine
 
     # Servers to proxy the connection, or;
     # List of application servers:
@@ -21,10 +43,10 @@ define webproxyclient ( $vhosts )
     # ProxyPass / http://[IP Addr.]:[port]/
     # ProxyPassReverse / http://[IP Addr.]:[port]/
     # Example: 
-    ProxyPass / http://${ipaddress}:${vhosts[$name][port]}/
-    ProxyPassReverse / http://${ipaddress}:${vhosts[$name][port]}/
+    ProxyPass / ${httptech}://${ipaddress}:${vhosts[$name][port]}/
+    ProxyPassReverse / ${httptech}://${ipaddress}:${vhosts[$name][port]}/
  
-    ServerName $name
+    ServerName ${vhosts[$name][servername]}
 </VirtualHost>",
            tag => proxyconfigs,
 #Not in the catalog
