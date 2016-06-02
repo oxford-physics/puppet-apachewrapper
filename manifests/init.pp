@@ -12,7 +12,7 @@ define webproxyclient ( $vhosts )
      $httpconffile = "/etc/apache2/sites-enabled/${name}_on_${hostname}_proxy.conf"
  }
   @@file  { "$httpconffile":
-           content => "<VirtualHost *:*>
+           content => "<VirtualHost *:${vhosts[$name][port]}>
     ProxyPreserveHost On
 
     # Servers to proxy the connection, or;
@@ -21,8 +21,8 @@ define webproxyclient ( $vhosts )
     # ProxyPass / http://[IP Addr.]:[port]/
     # ProxyPassReverse / http://[IP Addr.]:[port]/
     # Example: 
-    ProxyPass / http://${ipaddress}:$vhosts[$name][port]/
-    ProxyPassReverse / http://${ipaddress}:$vhosts[$name][port]/
+    ProxyPass / http://${ipaddress}:${vhosts[$name][port]}/
+    ProxyPassReverse / http://${ipaddress}:${vhosts[$name][port]}/
  
     ServerName $name
 </VirtualHost>",
